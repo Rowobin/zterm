@@ -17,7 +17,7 @@ A low-level terminal manipulation library written in Zig. Built as an learning e
 Add library as a dependency in `build.zig.zon` file with the 
 following command:
 ```bash
-zig fetch --save git+[link]
+zig fetch --save git+https://github.com/Rowobin/zterm
 ```
 
 Add the following to the`build.zig` file:
@@ -41,3 +41,13 @@ pub fn main() void {
     });
 }
 ```
+
+## Building examples
+
+You can build any example with:
+```zig
+> zig build example_name
+```
+
+List of examples:
+- text_effects
