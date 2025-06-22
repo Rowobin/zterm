@@ -1,10 +1,10 @@
 > [!WARNING]
-> This library is a work in progress, bugs and incomplete feeatures are to be expected.
+> This library is a work in progress, bugs and incomplete features are to be expected.
 
 # zterm
 A low-level terminal manipulation library written in Zig. Built as an learning exercise, taking inspiration from [mibu](https://github.com/xyaman/mibu).
 
-> Tested with zig 0.14.0 and 0.15.0-dev.565+8e72a2528
+> Tested with zig 0.14.1
 
 ## Features
 
