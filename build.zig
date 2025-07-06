@@ -8,7 +8,7 @@ pub fn build(b: *std.Build) void {
     const zterm_mod = b.addModule("zterm", .{ .root_source_file = b.path("src/main.zig") });
 
     // Examples
-    const examples = [_][]const u8{"text_effects", "cursor", "raw_mode"};
+    const examples = [_][]const u8{"text_effects", "cursor", "raw_mode", "clear_screen"};
 
     for (examples) |example_name| {
         const example = b.addExecutable(.{ .name = example_name, .root_source_file = b.path(b.fmt("examples/{s}.zig", .{example_name})), .target = target, .optimize = optimize });

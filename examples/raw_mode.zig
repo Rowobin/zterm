@@ -12,14 +12,10 @@ pub fn main() !void{
         _ = posix.read(posix.STDIN_FILENO, @as([*]u8, @ptrCast(&c))[0..1]) catch unreachable;
         if(c == 0) continue;
 
-        if(ascii.isControl(c)){
-            std.debug.print("{d} ", .{c});
-        } else {
-            std.debug.print("{c} ", .{c});
-        }
+        std.debug.print("{c} ", .{c});
 
         const cursor_pos = zterm.cursor.getPosition() catch unreachable;
-        std.debug.print("Cursor is at line {d}\n\r", .{cursor_pos[0]});
+        std.debug.print("Cursor is at line {d}\r\n", .{cursor_pos[0]});
 
         if (c == 'q') break; // Press 'q' to quit
     }
