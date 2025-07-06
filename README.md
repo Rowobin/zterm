@@ -2,15 +2,18 @@
 > This library is a work in progress, bugs and incomplete features are to be expected.
 
 # zterm
-A low-level terminal manipulation library written in Zig. Built as an learning exercise, taking inspiration from [mibu](https://github.com/xyaman/mibu).
+A low-level terminal manipulation library for Unix systems written in Zig. Built as a learning exercise, taking inspiration from [mibu](https://github.com/xyaman/mibu).
 
 > Tested with zig 0.14.1
 
 ## Features
 
-- Style (bold, italic, underline, etc).
-- 8-16 colors.
-- True Color (24-bit RGB).
+- Style (bold, italic, underline, etc)
+- 8-16 colors
+- True Color (24-bit RGB)
+- Cursor manipulation (position, hide, show)
+- Enable/disable raw mode
+- Clear screen
 
 ## How to use
 
@@ -51,3 +54,5 @@ You can build any example with:
 
 List of examples:
 - text_effects
+- cursor
+- raw_mode

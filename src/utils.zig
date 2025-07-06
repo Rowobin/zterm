@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 
 // execute ANSI escape codes
 // https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797?permalink_comment_id=3857871
@@ -14,7 +15,6 @@ pub inline fn printEscapeCode(fmt: []const u8, args: anytype) void{
 }
 
 // reset text color and styles
-
 pub const print = struct {
     pub fn resetAll() void {
         printEscapeCode("0m", .{});
