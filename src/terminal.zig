@@ -30,3 +30,23 @@ pub fn enableRawMode() !posix.termios {
 pub fn disableRawMode(orig_termios: posix.termios) !void {
     try posix.tcsetattr(posix.STDIN_FILENO, posix.TCSA.FLUSH, orig_termios);
 }
+
+// get terminal size in the format [rows_num; columns_num]
+pub fn getTerminalSize() ![2]u16 {
+    var winsizestruct: posix.winsize = .{
+        .row = 0,
+        .col = 0,
+        .xpixel = 0,
+        .ypixel = 0
+    };
+
+    var winsize = [2]u16{0,0};
+
+    const err = std.posix.system.ioctl(std.io.getStdOut().handle, posix.T.IOCGWINSZ, @intFromPtr(&winsizestruct));
+    if(posix.errno(err) == .SUCCESS) {
+        winsize[0] = winsizestruct.row;
+        winsize[1] = winsizestruct.col;
+    }
+
+    return winsize;
+}
