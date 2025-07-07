@@ -48,6 +48,16 @@ pub const print = struct {
     pub fn moveToCol(x: u16) void {
         utils.printEscapeCode("{}G", .{x});
     }
+
+    // hide cursor
+    pub fn hide() void {
+        utils.printEscapeCode("?25l", .{});
+    }
+
+    // show cursor
+    pub fn show() void {
+        utils.printEscapeCode("?25h", .{});
+    }
 };
 
 // these methods return the escape codes
@@ -95,6 +105,16 @@ pub inline fn moveUpStart(y: u16) []const u8 {
 // move cursor to column x
 pub inline fn moveToCol(x: u16) []const u8 {
     return utils.returnEscapeCode("{}G", .{x});
+}
+
+// hide cursor
+pub inline fn hide() []const u8 {
+    return utils.returnEscapeCode("?25l", .{});
+}
+
+// show cursor
+pub inline fn show() []const u8 {
+    return utils.returnEscapeCode("?25h", .{});
 }
 
 // get cursor position in the format [row; column]
