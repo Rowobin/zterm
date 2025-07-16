@@ -13,6 +13,7 @@ If you find any bugs or other issues, please let me know. If you think there's f
 - Cursor manipulation (position, hide, show)
 - Enable/disable raw mode
 - Clear screen
+- Abstractions for input handling
 
 ## How to use
 
