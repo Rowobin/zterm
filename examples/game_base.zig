@@ -11,7 +11,7 @@ pub fn main() !void {
     zterm.clear.print.screen();
     zterm.cursor.print.hide();
 
-    const orig_termios = try zterm.terminal.enableRawMode();
+    const orig_termios = try zterm.rawMode.enable();
     defer reset(orig_termios) catch unreachable;
 
     while(true) {
@@ -67,7 +67,7 @@ pub fn draw() void {
     }
     std.debug.print("\n\r", .{});
 
-    const term_size = zterm.terminal.getTerminalSize() catch unreachable;
+    const term_size = zterm.utils.getTerminalSize() catch unreachable;
     
     i = 0;
     while (i < term_size[1]) : (i += 1) {
@@ -85,6 +85,6 @@ pub fn draw() void {
 }
 
 pub fn reset(orig_termios : posix.termios) !void {
-    try zterm.terminal.disableRawMode(orig_termios);
+    try zterm.rawMode.disable(orig_termios);
     zterm.cursor.print.show();
 }

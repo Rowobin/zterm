@@ -1,5 +1,5 @@
 # zterm
-A low-level terminal manipulation library for Unix systems written in Zig. Built as a learning exercise, taking inspiration from [mibu](https://github.com/xyaman/mibu).
+A single-file low-level terminal manipulation library for Unix systems written in Zig. Built as a learning exercise.
 
 If you find any bugs or other issues, please let me know. If you think there's features that I should add, suggestions are always appreciated!
 
@@ -16,6 +16,10 @@ If you find any bugs or other issues, please let me know. If you think there's f
 - Abstractions for input handling
 
 ## How to use
+
+Because this is a single-file library, you can just add the file "zterm.zig" to your project. You can also use `zig fetch`.
+
+### Zig fetch
 
 Add library as a dependency in `build.zig.zon` file with the 
 following command:
@@ -57,3 +61,7 @@ List of examples:
 - cursor
 - raw_mode
 - clear_screen
+
+## Credits
+
+I got the idea to build this library from [mibu](https://github.com/xyaman/mibu).

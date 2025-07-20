@@ -6,11 +6,11 @@ const zterm = @import("zterm");
 pub fn main() !void{
     // enable raw mode
     // the terminal will now process user input byte by byte
-    const orig_termios = try zterm.terminal.enableRawMode();
-    defer zterm.terminal.disableRawMode(orig_termios) catch unreachable; // disable raw mode at the end
+    const orig_termios = try zterm.rawMode.enable();
+    defer zterm.rawMode.disable(orig_termios) catch unreachable; // disable raw mode at the end
 
     while (true) {
-        const input = zterm.terminal.getNextInput();
+        const input = zterm.rawMode.getNextInput();
         
         if(input.value == 0) continue;
         

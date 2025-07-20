@@ -5,7 +5,7 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     // Zterm module
-    const zterm_mod = b.addModule("zterm", .{ .root_source_file = b.path("src/main.zig") });
+    const zterm_mod = b.addModule("zterm", .{ .root_source_file = b.path("src/zterm.zig") });
 
     // Examples
     const examples = [_][]const u8{"text_effects", "cursor", "raw_mode", "clear_screen", "game_base"};

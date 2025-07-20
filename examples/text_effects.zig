@@ -34,39 +34,39 @@ pub fn main() !void {
         zterm.utils.resetAll()
     });
 
-    zterm.styles.print.blinking.set();
+    zterm.style.print.blinking.set();
     std.debug.print("Hello, world! (blinking)\n", .{});
-    zterm.styles.print.blinking.reset();
+    zterm.style.print.blinking.reset();
 
-    zterm.styles.print.bold.set();
+    zterm.style.print.bold.set();
     std.debug.print("Hello, world! (bold)\n", .{});
     zterm.utils.print.resetAll();
 
-    zterm.styles.print.dim.set();
+    zterm.style.print.dim.set();
     std.debug.print("Hello, world! (dim)\n", .{});
     zterm.utils.print.resetAll();
 
-    zterm.styles.print.hidden.set();
+    zterm.style.print.hidden.set();
     std.debug.print("Hello, world! (hidden)\n", .{});
     zterm.utils.print.resetAll();
 
     std.debug.print("{s}Hello, world! (italic){s}\n", .{
-        zterm.styles.italic.set(),
-        zterm.styles.italic.reset()
+        zterm.style.italic.set(),
+        zterm.style.italic.reset()
     });
 
     std.debug.print("{s}Hello, world! (reverse){s}\n", .{
-        zterm.styles.reverse.set(),
+        zterm.style.reverse.set(),
         zterm.utils.resetAll()
     });
 
     std.debug.print("{s}Hello, world! (strikethrough){s}\n", .{
-        zterm.styles.strikethrough.set(),
+        zterm.style.strikethrough.set(),
         zterm.utils.resetAll()
     });
 
     std.debug.print("{s}Hello, world! (underline){s}\n", .{
-        zterm.styles.underline.set(),
+        zterm.style.underline.set(),
         zterm.utils.resetAll()
     });
 }
