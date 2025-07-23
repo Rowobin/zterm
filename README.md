@@ -14,6 +14,7 @@ If you find any bugs or other issues, please let me know. If you think there's f
 - Enable/disable raw mode
 - Clear screen
 - Abstractions for input handling
+- Alternate Screen Support
 
 ## How to use
 
@@ -61,6 +62,8 @@ List of examples:
 - cursor
 - raw_mode
 - clear_screen
+- game_base
+- alt_screen
 
 ## Credits
 
