@@ -411,14 +411,14 @@ pub const altScreen = struct {
         }
     };
 
-    pub inline fn enable() void {
-        utils.printEscapeCode("?1049h", .{});
+    pub inline fn enable() []const u8 {
         altScreen.enabled = true;
+        return utils.returnEscapeCode("?1049h", .{});
     }
 
-    pub inline fn disable() void {
-        utils.printEscapeCode("?1049l", .{});
+    pub inline fn disable() []const u8 {
         altScreen.enabled = false;
+        return utils.returnEscapeCode("?1049l", .{});
     }
 
     pub inline fn isEnabled() bool {
