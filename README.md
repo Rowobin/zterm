@@ -1,9 +1,11 @@
 # zterm
-A single-file low-level terminal manipulation library for Unix systems written in Zig. Built as a learning exercise.
+A single-file low-level terminal manipulation library for unix systems written in Zig. Built as a learning exercise.
 
 If you find any bugs or other issues, please let me know. If you think there's features that I should add, suggestions are always appreciated!
 
 > Tested with zig 0.14.1
+
+> Tested with Ghostty
 
 ## Features
 
@@ -13,7 +15,7 @@ If you find any bugs or other issues, please let me know. If you think there's f
 - Cursor manipulation (position, hide, show)
 - Enable/disable raw mode
 - Clear screen
-- Abstractions for input handling
+- Abstractions for mouse and keyboard input handling
 
 ## How to use
 
@@ -61,6 +63,8 @@ List of examples:
 - cursor
 - raw_mode
 - clear_screen
+- game_base
+- mouse_input
 
 ## Credits
 

@@ -9,6 +9,10 @@ pub fn main() !void{
     const orig_termios = try zterm.rawMode.enable();
     defer zterm.rawMode.disable(orig_termios) catch unreachable; // disable raw mode at the end
 
+    // test mouse input 
+    zterm.rawMode.enableMouseInput();
+    defer zterm.rawMode.disableMouseInput();
+
     while (true) {
         const input = zterm.rawMode.getNextInput();
         
@@ -18,6 +22,18 @@ pub fn main() !void{
             .ALPHANUM,
             .PRINTABLE => {
                 std.debug.print("{c} ", .{input.value});
+            },
+            .MOUSE => {
+                std.debug.print("MOUSE INPUT!\n\r  BUTTON: {s}\n\r  POS:{d},{d}\n\r  CTRL: {any}\n\r  SHIFT: {any}\n\r  META: {any}\n\r  MOTION: {any}\n\r", .{
+                    @tagName(input.mouse.button),
+                    input.mouse.column,
+                    input.mouse.row,
+                    input.mouse.ctrl,
+                    input.mouse.shift,
+                    input.mouse.meta,
+                    input.mouse.motion
+                });
+                continue;
             },
             .NONE => {
                 std.debug.print("NONE enum (raw value: {d}) ", .{input.value});

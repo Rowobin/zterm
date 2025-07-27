@@ -437,6 +437,16 @@ pub const rawMode = struct {
         try std.posix.tcsetattr(std.posix.STDIN_FILENO, std.posix.TCSA.FLUSH, orig_termios);
     }
 
+    pub fn enableMouseInput() void {
+        utils.printEscapeCode("?1003h", .{});
+        utils.printEscapeCode("?1006h", .{});
+    }
+
+    pub fn disableMouseInput() void {
+        utils.printEscapeCode("?1003l", .{});
+        utils.printEscapeCode("?1006l", .{});
+    }
+
     pub fn getNextInput() input {
         var c: [32]u8 = undefined;
         c[0] = 0;
@@ -445,12 +455,20 @@ pub const rawMode = struct {
         var ret: input = .{
             .value = c[0],
             .key = .NONE,
+            .mouse = .{
+                .button = .NONE,
+                .column = 0,
+                .row = 0,
+                .shift = false,
+                .ctrl = false,
+                .meta = false,
+                .motion = false
+            }
         };
 
         if (bytes_read == 0) return ret;
 
         if (bytes_read == 1) {
-            // printable characters
             if(std.ascii.isPrint(c[0])) {
                 ret.key = .PRINTABLE;
                 if (std.ascii.isAlphanumeric(c[0])) {
@@ -458,10 +476,8 @@ pub const rawMode = struct {
                 }
             }
 
-            // CTRL inputs
             if(c[0] >= 1 and c[0] <= 26) ret.key = @enumFromInt(c[0]);
 
-            // control characters
             switch (c[0]) {
                 std.ascii.control_code.cr => ret.key = .ENTER,
                 std.ascii.control_code.ht => ret.key = .TAB,
@@ -469,7 +485,7 @@ pub const rawMode = struct {
                 std.ascii.control_code.del => ret.key = .DELETE,
                 else => {}
             }
-        } else if (c[0] == 27 and c[1] == '[') {
+        } else if (c[0] == '\x1b' and c[1] == '[') {
             if (bytes_read == 3) {
                 switch (c[2]) {
                     'A' => ret.key = .ARROW_UP,
@@ -491,6 +507,55 @@ pub const rawMode = struct {
                     '8' => ret.key = .END,
                     else => {},
                 }
+            } else if (bytes_read >= 6 and c[2] == '<') {
+                ret.key = .MOUSE;
+                
+                const mouse_data = c[3..bytes_read-1];
+                const last_char = c[bytes_read-1];
+
+                var iter = std.mem.splitAny(u8, mouse_data, ";");
+                const B_str = iter.next() orelse return ret;
+                const C_str = iter.next() orelse return ret;
+                const R_str = iter.next() orelse return ret;
+                if (iter.next() != null) return ret; // Extra parts indicate invalid format
+
+                const B = std.fmt.parseInt(u32, B_str, 10) catch return ret;
+                const C = std.fmt.parseInt(u32, C_str, 10) catch return ret;
+                const R = std.fmt.parseInt(u32, R_str, 10) catch return ret;
+
+                ret.mouse.column = C;
+                ret.mouse.row = R;
+                ret.mouse.shift = (B & 4) != 0;
+                ret.mouse.meta = (B & 8) != 0;
+                ret.mouse.ctrl = (B & 16) != 0;
+
+                if (last_char == 'M') {
+                    if (B & 32 != 0) {
+                        ret.mouse.motion = true;
+                        ret.mouse.button = switch (B & 3) {
+                            0 => .LEFT,
+                            1 => .MIDDLE,
+                            2 => .RIGHT,
+                            else => .NONE,
+                        };
+                    } else if (B >= 64) {
+                        ret.mouse.motion = false;
+                        if (B == 64) ret.mouse.button = .SCROLL_UP
+                        else if (B == 65) ret.mouse.button = .SCROLL_DOWN
+                        else ret.mouse.button = .NONE;
+                    } else {
+                        ret.mouse.motion = false;
+                        ret.mouse.button = switch (B & 3) {
+                            0 => .LEFT,
+                            1 => .MIDDLE,
+                            2 => .RIGHT,
+                            else => .NONE,
+                        };
+                    }
+                } else if (last_char == 'm') {
+                    ret.mouse.motion = false;
+                    ret.mouse.button = .RELEASE;
+                }
             }
         }
 
@@ -500,6 +565,7 @@ pub const rawMode = struct {
     pub const input = struct {
         value: u8,
         key: key_type,
+        mouse: mouse_event
     };
 
     pub const key_type = enum(u8) {
@@ -547,8 +613,30 @@ pub const rawMode = struct {
         PAGE_UP,
         PAGE_DOWN,
 
+        MOUSE,
+
         ALPHANUM,
         PRINTABLE,
+    };
+
+    pub const mouse_event = struct {
+        button: mouse_button,
+        column: u32,
+        row: u32,
+        shift: bool,
+        ctrl: bool,
+        meta: bool,
+        motion: bool
+    };
+
+    pub const mouse_button = enum (u8) {
+        LEFT,
+        MIDDLE,
+        RIGHT,
+        RELEASE,
+        SCROLL_UP,
+        SCROLL_DOWN,
+        NONE
     };
 };
 

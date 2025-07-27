@@ -68,14 +68,17 @@ pub fn draw() void {
     std.debug.print("\n\r", .{});
 
     const term_size = zterm.utils.getTerminalSize() catch unreachable;
-    
+
     i = 0;
     while (i < term_size[1]) : (i += 1) {
         std.debug.print("=", .{});
     }
     std.debug.print("\n\r", .{});
 
-    std.debug.print("WSAD TO MOVE || Q TO QUIT\n\r", .{});
+    std.debug.print("WSAD TO MOVE || Q TO QUIT || TERM SIZE ({d}, {d})\n\r", .{
+        term_size[0],
+        term_size[1]
+    });
 
     i = 0;
     while (i < term_size[1]) : (i += 1) {
