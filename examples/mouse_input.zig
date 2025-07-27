@@ -29,8 +29,11 @@ const strings = [_][]const u8{ "Welcome to Zterm :)", "made by rowobin", "exit" 
 const lines = [_][] const u8{2, 4, 6};
 
 pub fn main() !void {
-    zterm.clear.print.screen();
     zterm.cursor.print.hide();
+    defer zterm.cursor.print.show();
+
+    zterm.altScreen.print.enable();
+    defer zterm.altScreen.print.disable();
 
     const orig_termios = try zterm.rawMode.enable();
     defer zterm.rawMode.disable(orig_termios) catch unreachable;

@@ -425,6 +425,7 @@ pub const altScreen = struct {
         return altScreen.enabled;
     }
 };
+
 // *******************************
 // RAW INPUT MODE
 // *******************************
