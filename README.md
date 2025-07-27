@@ -15,6 +15,7 @@ If you find any bugs or other issues, please let me know. If you think there's f
 - Cursor manipulation (position, hide, show)
 - Enable/disable raw mode
 - Clear screen
+- Alternate Screen Support
 - Abstractions for mouse and keyboard input handling
 
 ## How to use
@@ -64,6 +65,7 @@ List of examples:
 - raw_mode
 - clear_screen
 - game_base
+- alt_screen
 - mouse_input
 
 ## Credits

@@ -5,23 +5,13 @@ const std = @import("std");
 // *******************************
 
 pub const color = struct {
-    pub const codes = enum(u8) {
-        black = 0, 
-        red, 
-        green, 
-        yellow, 
-        blue, 
-        magenta, 
-        cyan, 
-        white,
-        default
-    };
+    pub const codes = enum(u8) { black = 0, red, green, yellow, blue, magenta, cyan, white, default };
 
     pub const print = struct {
         pub fn fg(code: codes) void {
             utils.printEscapeCode("38;5;{d}m", .{@intFromEnum(code)});
         }
-        
+
         pub fn bg(code: codes) void {
             utils.printEscapeCode("48;5;{d}m", .{@intFromEnum(code)});
         }
@@ -75,146 +65,146 @@ pub const color = struct {
 pub const style = struct {
     pub const print = struct {
         pub const bold = struct {
-            pub inline fn set() void{
+            pub inline fn set() void {
                 utils.printEscapeCode("1m", .{});
             }
-            pub inline fn reset() void{
+            pub inline fn reset() void {
                 utils.printEscapeCode("22m", .{});
             }
         };
 
         pub const dim = struct {
-            pub inline fn set() void{
+            pub inline fn set() void {
                 utils.printEscapeCode("2m", .{});
             }
-            pub inline fn reset() void{
+            pub inline fn reset() void {
                 utils.printEscapeCode("22m", .{});
             }
         };
 
         pub const italic = struct {
-            pub inline fn set() void{
+            pub inline fn set() void {
                 utils.printEscapeCode("3m", .{});
             }
-            pub inline fn reset() void{
+            pub inline fn reset() void {
                 utils.printEscapeCode("23m", .{});
             }
         };
 
         pub const underline = struct {
-            pub inline fn set() void{
+            pub inline fn set() void {
                 utils.printEscapeCode("4m", .{});
             }
-            pub inline fn reset() void{
+            pub inline fn reset() void {
                 utils.printEscapeCode("24m", .{});
             }
         };
 
         pub const blinking = struct {
-            pub inline fn set() void{
+            pub inline fn set() void {
                 utils.printEscapeCode("5m", .{});
             }
-            pub inline fn reset() void{
+            pub inline fn reset() void {
                 utils.printEscapeCode("25m", .{});
             }
         };
 
         pub const reverse = struct {
-            pub inline fn set() void{
+            pub inline fn set() void {
                 utils.printEscapeCode("7m", .{});
             }
-            pub inline fn reset() void{
+            pub inline fn reset() void {
                 utils.printEscapeCode("27m", .{});
             }
         };
 
         pub const hidden = struct {
-            pub inline fn set() void{
+            pub inline fn set() void {
                 utils.printEscapeCode("8m", .{});
             }
-            pub inline fn reset() void{
+            pub inline fn reset() void {
                 utils.printEscapeCode("28m", .{});
             }
         };
 
         pub const strikethrough = struct {
-            pub inline fn set() void{
+            pub inline fn set() void {
                 utils.printEscapeCode("9m", .{});
             }
-            pub inline fn reset() void{
+            pub inline fn reset() void {
                 utils.printEscapeCode("29m", .{});
             }
         };
     };
 
     pub const bold = struct {
-        pub inline fn set() []const u8{
+        pub inline fn set() []const u8 {
             return utils.returnEscapeCode("1m", .{});
         }
-        pub inline fn reset() []const u8{
+        pub inline fn reset() []const u8 {
             return utils.returnEscapeCode("22m", .{});
         }
     };
 
     pub const dim = struct {
-        pub inline fn set() []const u8{
+        pub inline fn set() []const u8 {
             return utils.returnEscapeCode("2m", .{});
         }
-        pub inline fn reset() []const u8{
+        pub inline fn reset() []const u8 {
             return utils.returnEscapeCode("22m", .{});
         }
     };
 
     pub const italic = struct {
-        pub inline fn set() []const u8{
+        pub inline fn set() []const u8 {
             return utils.returnEscapeCode("3m", .{});
         }
-        pub inline fn reset() []const u8{
+        pub inline fn reset() []const u8 {
             return utils.returnEscapeCode("23m", .{});
         }
     };
 
     pub const underline = struct {
-        pub inline fn set() []const u8{
+        pub inline fn set() []const u8 {
             return utils.returnEscapeCode("4m", .{});
         }
-        pub inline fn reset() []const u8{
+        pub inline fn reset() []const u8 {
             return utils.returnEscapeCode("24m", .{});
         }
     };
 
     pub const blinking = struct {
-        pub inline fn set() []const u8{
+        pub inline fn set() []const u8 {
             return utils.returnEscapeCode("5m", .{});
         }
-        pub inline fn reset() []const u8{
+        pub inline fn reset() []const u8 {
             return utils.returnEscapeCode("25m", .{});
         }
     };
 
     pub const reverse = struct {
-        pub inline fn set() []const u8{
+        pub inline fn set() []const u8 {
             return utils.returnEscapeCode("7m", .{});
         }
-        pub inline fn reset() []const u8{
+        pub inline fn reset() []const u8 {
             return utils.returnEscapeCode("27m", .{});
         }
     };
 
     pub const hidden = struct {
-        pub inline fn set() []const u8{
+        pub inline fn set() []const u8 {
             return utils.returnEscapeCode("8m", .{});
         }
-        pub inline fn reset() []const u8{
+        pub inline fn reset() []const u8 {
             return utils.returnEscapeCode("28m", .{});
         }
     };
 
     pub const strikethrough = struct {
-        pub inline fn set() []const u8{
+        pub inline fn set() []const u8 {
             return utils.returnEscapeCode("9m", .{});
         }
-        pub inline fn reset() []const u8{
+        pub inline fn reset() []const u8 {
             return utils.returnEscapeCode("29m", .{});
         }
     };
@@ -233,8 +223,8 @@ pub const clear = struct {
         pub fn cursorToBeginning() void {
             utils.printEscapeCode("1J", .{});
         }
-        
-        pub fn screen() void{
+
+        pub fn screen() void {
             utils.printEscapeCode("2J", .{});
         }
 
@@ -255,23 +245,23 @@ pub const clear = struct {
         return utils.returnEscapeCode("0J", .{});
     }
 
-    pub inline fn cursorToBeginning() []const u8{
+    pub inline fn cursorToBeginning() []const u8 {
         return utils.returnEscapeCode("1J", .{});
     }
 
-    pub inline fn screen() []const u8{
+    pub inline fn screen() []const u8 {
         return utils.returnEscapeCode("2J", .{});
     }
 
-    pub inline fn cursorToEndLine() []const u8{
+    pub inline fn cursorToEndLine() []const u8 {
         return utils.returnEscapeCode("0K", .{});
     }
 
-    pub inline fn cursorToBeginningLine() []const u8{
+    pub inline fn cursorToBeginningLine() []const u8 {
         return utils.returnEscapeCode("1K", .{});
     }
 
-    pub inline fn line() []const u8{
+    pub inline fn line() []const u8 {
         return utils.returnEscapeCode("2K", .{});
     }
 };
@@ -287,7 +277,7 @@ pub const cursor = struct {
         }
 
         pub fn moveTo(x: u16, y: u16) void {
-            utils.printEscapeCode("{};{}H", .{x, y});
+            utils.printEscapeCode("{};{}H", .{ x, y });
         }
 
         pub fn moveUp(y: u16) void {
@@ -332,7 +322,7 @@ pub const cursor = struct {
     }
 
     pub inline fn moveTo(x: u16, y: u16) []const u8 {
-        return utils.returnEscapeCode("{};{}H", .{x, y});
+        return utils.returnEscapeCode("{};{}H", .{ x, y });
     }
 
     pub inline fn moveUp(y: u16) []const u8 {
@@ -379,23 +369,23 @@ pub const cursor = struct {
 
         try stdout.writeAll(utils.returnEscapeCode("6n", .{}));
 
-        var pos = [2]u16{0,0};
+        var pos = [2]u16{ 0, 0 };
         var buffer: [32]u8 = undefined;
         var index: usize = 0;
         var pos_i: u8 = 0;
 
-        while(index < buffer.len-1) : (index += 1){
+        while (index < buffer.len - 1) : (index += 1) {
             buffer[index] = try stdin.readByte();
 
-            if(std.ascii.isDigit(buffer[index])){
+            if (std.ascii.isDigit(buffer[index])) {
                 pos[pos_i] = pos[pos_i] * 10 + (buffer[index] - '0');
             }
 
-            if(buffer[index] == 'R'){
+            if (buffer[index] == 'R') {
                 index += 1;
                 break;
             }
-            if(buffer[index] == ';') pos_i += 1;
+            if (buffer[index] == ';') pos_i += 1;
         }
         buffer[index] = 0;
 
@@ -403,6 +393,38 @@ pub const cursor = struct {
     }
 };
 
+// *********************
+// ALT SCREEN
+// *********************
+
+pub const altScreen = struct {
+    pub var enabled: bool = false;
+    pub const print = struct {
+        pub fn enable() void {
+            utils.printEscapeCode("?1049h", .{});
+            altScreen.enabled = true;
+        }
+
+        pub fn disable() void {
+            utils.printEscapeCode("?1049l", .{});
+            altScreen.enabled = false;
+        }
+    };
+
+    pub inline fn enable() []const u8 {
+        altScreen.enabled = true;
+        return utils.returnEscapeCode("?1049h", .{});
+    }
+
+    pub inline fn disable() []const u8 {
+        altScreen.enabled = false;
+        return utils.returnEscapeCode("?1049l", .{});
+    }
+
+    pub inline fn isEnabled() bool {
+        return altScreen.enabled;
+    }
+};
 // *******************************
 // RAW INPUT MODE
 // *******************************
@@ -483,7 +505,7 @@ pub const rawMode = struct {
                 std.ascii.control_code.ht => ret.key = .TAB,
                 std.ascii.control_code.bs => ret.key = .BACKSPACE,
                 std.ascii.control_code.del => ret.key = .DELETE,
-                else => {}
+                else => {},
             }
         } else if (c[0] == '\x1b' and c[1] == '[') {
             if (bytes_read == 3) {
@@ -646,13 +668,13 @@ pub const rawMode = struct {
 
 pub const utils = struct {
     // https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797?permalink_comment_id=3857871
-    pub inline fn returnEscapeCode(fmt: []const u8, args: anytype) []const u8{
+    pub inline fn returnEscapeCode(fmt: []const u8, args: anytype) []const u8 {
         const str = "\x1b[" ++ fmt;
         var buf: [32]u8 = undefined;
         return std.fmt.bufPrint(&buf, str, args) catch unreachable;
     }
 
-    pub inline fn printEscapeCode(fmt: []const u8, args: anytype) void{
+    pub inline fn printEscapeCode(fmt: []const u8, args: anytype) void {
         const str = "\x1b[" ++ fmt;
         std.debug.print(str, args);
     }
@@ -670,17 +692,12 @@ pub const utils = struct {
     // get terminal size in the format [rows_num; columns_num]
     // requires raw mode to be enabled
     pub fn getTerminalSize() ![2]u16 {
-        var winsizestruct: std.posix.winsize = .{
-            .row = 0,
-            .col = 0,
-            .xpixel = 0,
-            .ypixel = 0
-        };
+        var winsizestruct: std.posix.winsize = .{ .row = 0, .col = 0, .xpixel = 0, .ypixel = 0 };
 
-        var winsize = [2]u16{0,0};
+        var winsize = [2]u16{ 0, 0 };
 
         const err = std.posix.system.ioctl(std.io.getStdOut().handle, std.posix.T.IOCGWINSZ, @intFromPtr(&winsizestruct));
-        if(std.posix.errno(err) == .SUCCESS) {
+        if (std.posix.errno(err) == .SUCCESS) {
             winsize[0] = winsizestruct.row;
             winsize[1] = winsizestruct.col;
         }
