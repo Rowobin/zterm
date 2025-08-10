@@ -3,10 +3,13 @@ const zterm = @import("zterm");
 
 //
 // [TEXT_EFFECTS]
-// This examples shows how to style text with colors and styles
+// This example shows how to style text with colors and styles
 //
 
 pub fn main() !void {
+
+    // Using Colors
+    
     zterm.color.print.fg(.red);
     std.debug.print("Hello, world! (red text)\n", .{});
     zterm.utils.print.resetAll();
@@ -33,6 +36,8 @@ pub fn main() !void {
         zterm.color.bgRGB(230, 57, 70),
         zterm.utils.resetAll()
     });
+
+    // Using Styles
 
     zterm.style.print.blinking.set();
     std.debug.print("Hello, world! (blinking)\n", .{});

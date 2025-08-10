@@ -1,6 +1,11 @@
 const std = @import("std");
 const zterm = @import("zterm");
 
+//
+// [ALT_SCREEN]
+// This example shows how to use the alternate terminal buffer
+//
+
 pub fn main() !void {
     zterm.altScreen.print.enable();
     defer zterm.altScreen.print.disable();

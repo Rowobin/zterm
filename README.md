@@ -1,11 +1,11 @@
 # zterm
 A single-file low-level terminal manipulation library for unix systems written in Zig. Built as a learning exercise.
 
-If you find any bugs or other issues, please let me know. If you think there's features that I should add, suggestions are always appreciated!
+If you find any bugs or other issues, please let me know. If you think there's features that I should add, suggestions and PRs are always appreciated!
 
 > Tested with zig 0.14.1
 
-> Tested with Ghostty
+> Tested with MacOs Terminal, Ghostty and Kitty
 
 ## Features
 

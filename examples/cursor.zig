@@ -1,6 +1,11 @@
 const std = @import("std");
 const zterm = @import("zterm");
 
+//
+// [CURSOR]
+// This example shows how to use functions to manipulate
+//
+
 pub fn main() !void {
     zterm.clear.print.screen();
 

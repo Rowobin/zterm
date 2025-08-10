@@ -3,13 +3,18 @@ const posix = std.posix;
 const ascii = std.ascii;
 const zterm = @import("zterm");
 
+//
+// [RAW_MODE]
+// This example shows how to enable raw input mode and how to process user input byte by byte 
+//
+
 pub fn main() !void{
     // enable raw mode
     // the terminal will now process user input byte by byte
     const orig_termios = try zterm.rawMode.enable();
     defer zterm.rawMode.disable(orig_termios) catch unreachable; // disable raw mode at the end
 
-    // test mouse input 
+    // test mouse input (optional)
     zterm.rawMode.enableMouseInput();
     defer zterm.rawMode.disableMouseInput();
 

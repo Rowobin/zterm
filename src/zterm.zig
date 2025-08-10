@@ -1,13 +1,33 @@
 const std = @import("std");
 
 // *******************************
+// WELCOME TO ZTERM - A Zig library for terminal manipulation
+// Relevant information:
+// - print functions instantly execute a code, other functions return the code to the user
+// - zterm currently only supporta unix systems, windows compatibility will be added in the future
+// *******************************
+
+// *******************************
 // CUSTOMIZE TEXT COLOR
 // *******************************
 
 pub const color = struct {
-    pub const codes = enum(u8) { black = 0, red, green, yellow, blue, magenta, cyan, white, default };
+    pub const codes = enum(u8) {
+        black = 0,
+        red,
+        green,
+        yellow,
+        blue,
+        magenta,
+        cyan,
+        white,
+        default
+    };
 
+    // print functions instantly execute a code
+    // other functions return the code to the user
     pub const print = struct {
+        // fg() and bg() set colors based on the enum 'codes'
         pub fn fg(code: codes) void {
             utils.printEscapeCode("38;5;{d}m", .{@intFromEnum(code)});
         }
@@ -16,6 +36,7 @@ pub const color = struct {
             utils.printEscapeCode("48;5;{d}m", .{@intFromEnum(code)});
         }
 
+        // fgRGB() and bgRGB() set colors based on the RGB color system
         pub fn fgRGB(r: u8, g: u8, b: u8) void {
             utils.printEscapeCode("38;2;{d};{d};{d}m", .{ r, g, b });
         }
@@ -24,6 +45,7 @@ pub const color = struct {
             utils.printEscapeCode("48;2;{d};{d};{d}m", .{ r, g, b });
         }
 
+        // fg256() and b256g() set colors based 'True color' system
         pub fn fg256(color256: u8) void {
             utils.printEscapeCode("38;5;{d}m", .{color256});
         }
@@ -33,6 +55,8 @@ pub const color = struct {
         }
     };
 
+    // fg() and bg() set colors based on the enum 'codes'
+    // these color codes should be supported in most terminals
     pub inline fn fg(code: codes) []const u8 {
         return utils.returnEscapeCode("38;5;{d}m", .{@intFromEnum(code)});
     }
@@ -41,6 +65,8 @@ pub const color = struct {
         return utils.returnEscapeCode("48;5;{d}m", .{@intFromEnum(code)});
     }
 
+    // fgRGB() and bgRGB() set colors based on the RGB color system
+    // these color codes should be supported in some (modern) terminals
     pub inline fn fgRGB(r: u8, g: u8, b: u8) []const u8 {
         return utils.returnEscapeCode("38;2;{d};{d};{d}m", .{ r, g, b });
     }
@@ -49,6 +75,8 @@ pub const color = struct {
         return utils.returnEscapeCode("48;2;{d};{d};{d}m", .{ r, g, b });
     }
 
+    // fg256() and b256g() set colors based 'True color' system
+    // these color codes should be supported in most terminals
     pub inline fn fg256(color256: u8) []const u8 {
         return utils.returnEscapeCode("38;5;{d}m", .{color256});
     }
@@ -276,36 +304,36 @@ pub const cursor = struct {
             utils.printEscapeCode("H", .{});
         }
 
-        pub fn moveTo(x: u16, y: u16) void {
-            utils.printEscapeCode("{};{}H", .{ x, y });
+        pub fn moveTo(row: u16, col: u16) void {
+            utils.printEscapeCode("{};{}H", .{ row, col});
         }
 
-        pub fn moveUp(y: u16) void {
-            utils.printEscapeCode("{}A", .{y});
+        pub fn moveUp(rows: u16) void {
+            utils.printEscapeCode("{}A", .{rows});
         }
 
-        pub fn moveDown(y: u16) void {
-            utils.printEscapeCode("{}B", .{y});
+        pub fn moveDown(rows: u16) void {
+            utils.printEscapeCode("{}B", .{rows});
         }
 
-        pub fn moveRight(x: u16) void {
-            utils.printEscapeCode("{}C", .{x});
+        pub fn moveRight(cols: u16) void {
+            utils.printEscapeCode("{}C", .{cols});
         }
 
-        pub fn moveLeft(x: u16) void {
-            utils.printEscapeCode("{}D", .{x});
+        pub fn moveLeft(cols: u16) void {
+            utils.printEscapeCode("{}D", .{cols});
         }
 
-        pub fn moveDownStart(y: u16) void {
-            utils.printEscapeCode("{}E", .{y});
+        pub fn moveDownStart(rows: u16) void {
+            utils.printEscapeCode("{}E", .{rows});
         }
 
-        pub fn moveUpStart(y: u16) void {
-            utils.printEscapeCode("{}F", .{y});
+        pub fn moveUpStart(rows: u16) void {
+            utils.printEscapeCode("{}F", .{rows});
         }
 
-        pub fn moveToCol(x: u16) void {
-            utils.printEscapeCode("{}G", .{x});
+        pub fn moveToCol(col: u16) void {
+            utils.printEscapeCode("{}G", .{col});
         }
 
         pub fn hide() void {
@@ -321,36 +349,36 @@ pub const cursor = struct {
         return utils.returnEscapeCode("H", .{});
     }
 
-    pub inline fn moveTo(x: u16, y: u16) []const u8 {
-        return utils.returnEscapeCode("{};{}H", .{ x, y });
+    pub inline fn moveTo(row: u16, col: u16) []const u8 {
+        return utils.returnEscapeCode("{};{}H", .{ row, col });
     }
 
-    pub inline fn moveUp(y: u16) []const u8 {
-        return utils.returnEscapeCode("{}A", .{y});
+    pub inline fn moveUp(rows: u16) []const u8 {
+        return utils.returnEscapeCode("{}A", .{rows});
     }
 
-    pub inline fn moveDown(y: u16) []const u8 {
-        return utils.returnEscapeCode("{}B", .{y});
+    pub inline fn moveDown(rows: u16) []const u8 {
+        return utils.returnEscapeCode("{}B", .{rows});
     }
 
-    pub inline fn moveRight(x: u16) []const u8 {
-        return utils.returnEscapeCode("{}C", .{x});
+    pub inline fn moveRight(cols: u16) []const u8 {
+        return utils.returnEscapeCode("{}C", .{cols});
     }
 
-    pub inline fn moveLeft(x: u16) []const u8 {
-        return utils.returnEscapeCode("{}D", .{x});
+    pub inline fn moveLeft(cols: u16) []const u8 {
+        return utils.returnEscapeCode("{}D", .{cols});
     }
 
-    pub inline fn moveDownStart(y: u16) []const u8 {
-        return utils.returnEscapeCode("{}E", .{y});
+    pub inline fn moveDownStart(rows: u16) []const u8 {
+        return utils.returnEscapeCode("{}E", .{rows});
     }
 
-    pub inline fn moveUpStart(y: u16) []const u8 {
-        return utils.returnEscapeCode("{}F", .{y});
+    pub inline fn moveUpStart(row: u16) []const u8 {
+        return utils.returnEscapeCode("{}F", .{row});
     }
 
-    pub inline fn moveToCol(x: u16) []const u8 {
-        return utils.returnEscapeCode("{}G", .{x});
+    pub inline fn moveToCol(col: u16) []const u8 {
+        return utils.returnEscapeCode("{}G", .{col});
     }
 
     pub inline fn hide() []const u8 {
@@ -361,9 +389,13 @@ pub const cursor = struct {
         return utils.returnEscapeCode("?25h", .{});
     }
 
-    // get cursor position in the format [row; column]
+    pub const cursor_pos = struct {
+        rows: u16,
+        cols: u16
+    };
+    // get cursor position
     // requires raw mode to be enabled
-    pub fn getPosition() ![2]u16 {
+    pub fn getPosition() !cursor_pos {
         const stdin = std.io.getStdIn().reader();
         const stdout = std.io.getStdOut().writer();
 
@@ -389,7 +421,11 @@ pub const cursor = struct {
         }
         buffer[index] = 0;
 
-        return pos;
+        const ret: cursor_pos = .{
+            .rows = pos[0],
+            .cols = pos[1]
+        };
+        return ret;
     }
 };
 
@@ -690,19 +726,24 @@ pub const utils = struct {
         return returnEscapeCode("0m", .{});
     }
 
-    // get terminal size in the format [rows_num; columns_num]
+    pub const terminal_size = struct {
+        rows: u16,
+        cols: u16
+    };
+
+    // get terminal size
     // requires raw mode to be enabled
-    pub fn getTerminalSize() ![2]u16 {
+    pub fn getTerminalSize() !terminal_size {
         var winsizestruct: std.posix.winsize = .{ .row = 0, .col = 0, .xpixel = 0, .ypixel = 0 };
 
-        var winsize = [2]u16{ 0, 0 };
+        var ret: terminal_size = undefined;
 
         const err = std.posix.system.ioctl(std.io.getStdOut().handle, std.posix.T.IOCGWINSZ, @intFromPtr(&winsizestruct));
         if (std.posix.errno(err) == .SUCCESS) {
-            winsize[0] = winsizestruct.row;
-            winsize[1] = winsizestruct.col;
+            ret.rows = winsizestruct.row;
+            ret.cols = winsizestruct.col;
         }
 
-        return winsize;
+        return ret;
     }
 };

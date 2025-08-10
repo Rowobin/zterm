@@ -1,6 +1,11 @@
 const std = @import("std");
 const zterm = @import("zterm");
 
+//
+// [MOUSE_INPUT]
+// This example shows a simple way to process mouse input
+//
+
 const option = struct {
     text: [] const u8,
     line: u8,
