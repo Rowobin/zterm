@@ -1,5 +1,6 @@
 const std = @import("std");
 const zterm = @import("zterm");
+const builtin = @import("builtin");
 
 // TO-DO
 // Lose and restart
@@ -43,6 +44,11 @@ pub fn main() void {
     const orig_termios = zterm.rawMode.enable() catch unreachable;
     defer zterm.rawMode.disable(orig_termios) catch unreachable;
 
+    // turn on unicode support in windows
+    if (builtin.os.tag == .windows) {
+        _ = std.os.windows.kernel32.SetConsoleOutputCP(65001);
+    }
+
     setUpGame();    
     defer freePlayerMem();
 
@@ -62,7 +68,7 @@ pub fn main() void {
 }
 
 pub fn handle_input() u1 {
-    const input = zterm.rawMode.getNextInput();
+    const input = zterm.rawMode.getNextInput() catch unreachable;
 
     switch (input.value) {
         'q' => {

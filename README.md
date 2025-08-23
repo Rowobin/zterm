@@ -5,7 +5,7 @@ If you find any bugs or other issues, please let me know. If you think there's f
 
 > Tested with zig 0.14.1
 
-> Tested with MacOs Terminal, Ghostty and Kitty
+> Tested on MacOS, Linux and Windows
 
 ## Features
 

@@ -54,7 +54,7 @@ pub fn main() !void {
 }
 
 pub fn handleInput() i8 {
-    const input = zterm.rawMode.getNextInput();
+    const input = zterm.rawMode.getNextInput() catch unreachable;
     if (input.value == 0) return 0;
     if (input.value == 'q') return -1;
 

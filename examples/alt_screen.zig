@@ -21,7 +21,7 @@ pub fn main() !void {
     defer zterm.rawMode.disable(orig_termios) catch unreachable;
 
     while (true) {
-        const input = zterm.rawMode.getNextInput();
+        const input = zterm.rawMode.getNextInput() catch unreachable;
 
         if (input.value == 0) continue;
 

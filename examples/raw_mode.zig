@@ -19,7 +19,7 @@ pub fn main() !void{
     defer zterm.rawMode.disableMouseInput();
 
     while (true) {
-        const input = zterm.rawMode.getNextInput();
+        const input = zterm.rawMode.getNextInput() catch unreachable;
         
         if(input.value == 0) continue;
         
@@ -49,7 +49,7 @@ pub fn main() !void{
         }
 
         const cursor_pos = zterm.cursor.getPosition() catch unreachable;
-        std.debug.print("Cursor is at line {d}\r\n", .{cursor_pos[0]});
+        std.debug.print("Cursor is at line {d}\r\n", .{cursor_pos.rows});
 
         if (input.value == 'q' or input.key == .CTRL_C) break; // Press 'q' to quit
     }
