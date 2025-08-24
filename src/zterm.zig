@@ -26,7 +26,7 @@ pub const ZTermError = error{
 
 pub const Config = struct {
     // timeout for input reading in ms
-    // use std.math.maxInt(u8) to block
+    // use 256 to block
     input_timeout_ms: u8 = 100,
 };
 
@@ -534,7 +534,7 @@ pub const rawMode = struct {
         raw.oflag.OPOST = false; // output processing
         raw.cflag.CSIZE = .CS8; // set character size to 8bits per byte
 
-        if (global_config.input_timeout_ms == std.math.maxInt(u8)) {
+        if (global_config.input_timeout_ms == 256) {
             raw.cc[@intFromEnum(std.posix.V.MIN)] = 1; // read must read at least one byte before retuning
             raw.cc[@intFromEnum(std.posix.V.TIME)] = 0;
         } else {
@@ -574,6 +574,10 @@ pub const rawMode = struct {
         if (windows.kernel32.SetConsoleMode(std_handle, raw) == 0) {
             return ZTermError.WindowsAPIError;
         }
+
+        if (windows.kernel32.FlushFileBuffers(std_handle) == 0) { 
+        return ZTermError.WindowsAPIError;
+    }
         
         return orig_term;
     }
@@ -629,13 +633,12 @@ pub const rawMode = struct {
         const std_handle = windows.GetStdHandle(windows.STD_INPUT_HANDLE) catch 
             return ZTermError.WindowsAPIError;
         
-        const timeout = if (global_config.input_timeout_ms == std.math.maxInt(u8)) 
+        const timeout = if (global_config.input_timeout_ms == 256) 
             windows.INFINITE 
         else 
             global_config.input_timeout_ms;
 
         const wait_result = windows.kernel32.WaitForSingleObject(std_handle, timeout);
-        
         var c: [32]u8 = undefined;
         var bytes_read: usize = 0;
         
@@ -648,7 +651,7 @@ pub const rawMode = struct {
                 bytes_read = bytes_read_u32;
             },
             windows.WAIT_TIMEOUT => {
-                bytes_read = 0; // timeout occurred
+                bytes_read = 0;
             },
             else => return ZTermError.InputReadFailed,
         }
