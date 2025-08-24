@@ -25,16 +25,14 @@ pub const ZTermError = error{
 // *******************************
 
 pub const Config = struct {
-    /// timeout for input reading in ms
-    input_timeout_ms: u32 = 100,
+    // timeout for input reading in ms
+    // use std.math.maxInt(u8) to block
+    input_timeout_ms: u8 = 100,
 };
 
 var global_config = Config{};
 
 pub fn setConfig(config: Config) ZTermError!void {
-    if (config.input_timeout_ms > std.math.maxInt(u32) / 10) {
-        return ZTermError.InvalidTimeout;
-    }
     global_config = config;
 }
 
@@ -536,15 +534,12 @@ pub const rawMode = struct {
         raw.oflag.OPOST = false; // output processing
         raw.cflag.CSIZE = .CS8; // set character size to 8bits per byte
 
-        raw.cc[@intFromEnum(std.posix.V.MIN)] = 0; // read can return after reading 0 bytes
-        if (global_config.input_timeout_ms == 0) {
-            raw.cc[@intFromEnum(std.posix.V.TIME)] = 0; 
-        } else if (global_config.input_timeout_ms == std.math.maxInt(u32)) {
+        if (global_config.input_timeout_ms == std.math.maxInt(u8)) {
             raw.cc[@intFromEnum(std.posix.V.MIN)] = 1; // read must read at least one byte before retuning
             raw.cc[@intFromEnum(std.posix.V.TIME)] = 0;
         } else {
-            const timeout_decisecs = @min(255, (global_config.input_timeout_ms + 99) / 100);
-            raw.cc[@intFromEnum(std.posix.V.TIME)] = @intCast(timeout_decisecs);
+            raw.cc[@intFromEnum(std.posix.V.MIN)] = 0; // read can return before receving input
+            raw.cc[@intFromEnum(std.posix.V.TIME)] = global_config.input_timeout_ms/100;
         }
 
         std.posix.tcsetattr(std.posix.STDIN_FILENO, std.posix.TCSA.FLUSH, raw) catch 
@@ -634,7 +629,7 @@ pub const rawMode = struct {
         const std_handle = windows.GetStdHandle(windows.STD_INPUT_HANDLE) catch 
             return ZTermError.WindowsAPIError;
         
-        const timeout = if (global_config.input_timeout_ms == std.math.maxInt(u32)) 
+        const timeout = if (global_config.input_timeout_ms == std.math.maxInt(u8)) 
             windows.INFINITE 
         else 
             global_config.input_timeout_ms;
