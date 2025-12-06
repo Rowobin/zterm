@@ -1,5 +1,5 @@
 # zterm
-A single-file low-level terminal manipulation library for unix systems written in Zig. Built as a learning exercise.
+A single-file low-level terminal manipulation library written in Zig. Built as a learning exercise.
 
 If you find any bugs or other issues, please let me know. If you think there's features that I should add, suggestions and PRs are always appreciated!
 
