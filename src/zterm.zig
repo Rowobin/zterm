@@ -3,37 +3,41 @@ const windows = std.os.windows;
 const builtin = @import("builtin");
 
 // *******************************
-// WELCOME TO ZTERM - A Zig library for terminal manipulation
+// welcome to zterm - a zig library for terminal manipulation
 // *******************************
 
 // *******************************
-// ERROR TYPES
+// error types
 // *******************************
 
-pub const ZTermError = error{
+pub const ZtermError = error{
     UnsupportedPlatform,
     TerminalSetupFailed,
     InputReadFailed,
-    WindowsAPIError,
+    WindowsApiError,
     InvalidTimeout,
     CursorPositionFailed,
     TerminalSizeFailed,
 };
 
 // *******************************
-// CONFIGURATION
+// configuration
 // *******************************
 
 pub const Config = struct {
-    // timeout for input reading in ms
-    // use 256 to block
-    input_timeout_ms: u8 = 100,
+    timeout_unix: u8 = 1,
+    timeout_windows: u32 = 100,
 };
 
 var global_config = Config{};
 
-pub fn setConfig(config: Config) ZTermError!void {
+pub fn setConfig(config: Config) ZtermError!void {
     global_config = config;
+}
+
+pub fn setTimeout(timeout_ms: u16) ZtermError!void {
+    global_config.timeout_unix = if (timeout_ms == 256) 0 else @intCast(timeout_ms / 100);
+    global_config.timeout_windows = if (timeout_ms == 256) 0xFFFFFFFF else timeout_ms;
 }
 
 pub fn getConfig() Config {
@@ -41,11 +45,11 @@ pub fn getConfig() Config {
 }
 
 // *******************************
-// CUSTOMIZE TEXT COLOR
+// customize text color
 // *******************************
 
 pub const color = struct {
-    pub const codes = enum(u8) {
+    pub const Codes = enum(u8) {
         black = 0,
         red,
         green,
@@ -54,31 +58,31 @@ pub const color = struct {
         magenta,
         cyan,
         white,
-        default
+        default,
     };
 
     // print functions instantly execute a code
     // other functions return the code to the user
     pub const print = struct {
-        // fg() and bg() set colors based on the enum 'codes'
-        pub fn fg(code: codes) void {
+        // fg() and bg() set colors based on the enum 'Codes'
+        pub fn fg(code: Codes) void {
             utils.printEscapeCode("38;5;{d}m", .{@intFromEnum(code)});
         }
 
-        pub fn bg(code: codes) void {
+        pub fn bg(code: Codes) void {
             utils.printEscapeCode("48;5;{d}m", .{@intFromEnum(code)});
         }
 
-        // fgRGB() and bgRGB() set colors based on the RGB color system
-        pub fn fgRGB(r: u8, g: u8, b: u8) void {
+        // fgRgb() and bgRgb() set colors based on the rgb color system
+        pub fn fgRgb(r: u8, g: u8, b: u8) void {
             utils.printEscapeCode("38;2;{d};{d};{d}m", .{ r, g, b });
         }
 
-        pub fn bgRGB(r: u8, g: u8, b: u8) void {
+        pub fn bgRgb(r: u8, g: u8, b: u8) void {
             utils.printEscapeCode("48;2;{d};{d};{d}m", .{ r, g, b });
         }
 
-        // fg256() and bg256() set colors based 'True color' system
+        // fg256() and bg256() set colors based 'true color' system
         pub fn fg256(color256: u8) void {
             utils.printEscapeCode("38;5;{d}m", .{color256});
         }
@@ -88,27 +92,27 @@ pub const color = struct {
         }
     };
 
-    // fg() and bg() set colors based on the enum 'codes'
+    // fg() and bg() set colors based on the enum 'Codes'
     // these color codes should be supported in most terminals
-    pub inline fn fg(code: codes) []const u8 {
+    pub inline fn fg(code: Codes) []const u8 {
         return utils.returnEscapeCode("38;5;{d}m", .{@intFromEnum(code)});
     }
 
-    pub inline fn bg(code: codes) []const u8 {
+    pub inline fn bg(code: Codes) []const u8 {
         return utils.returnEscapeCode("48;5;{d}m", .{@intFromEnum(code)});
     }
 
-    // fgRGB() and bgRGB() set colors based on the RGB color system
+    // fgRgb() and bgRgb() set colors based on the rgb color system
     // these color codes should be supported in some (modern) terminals
-    pub inline fn fgRGB(r: u8, g: u8, b: u8) []const u8 {
+    pub inline fn fgRgb(r: u8, g: u8, b: u8) []const u8 {
         return utils.returnEscapeCode("38;2;{d};{d};{d}m", .{ r, g, b });
     }
 
-    pub inline fn bgRGB(r: u8, g: u8, b: u8) []const u8 {
+    pub inline fn bgRgb(r: u8, g: u8, b: u8) []const u8 {
         return utils.returnEscapeCode("48;2;{d};{d};{d}m", .{ r, g, b });
     }
 
-    // fg256() and bg256() set colors based 'True color' system
+    // fg256() and bg256() set colors based 'true color' system
     // these color codes should be supported in most terminals
     pub inline fn fg256(color256: u8) []const u8 {
         return utils.returnEscapeCode("38;5;{d}m", .{color256});
@@ -120,7 +124,7 @@ pub const color = struct {
 };
 
 // *******************************
-// CUSTOMIZE TEXT STYLE
+// customize text style
 // *******************************
 
 pub const style = struct {
@@ -272,7 +276,7 @@ pub const style = struct {
 };
 
 // *******************************
-// CLEAR METHODS
+// clear methods
 // *******************************
 
 pub const clear = struct {
@@ -328,7 +332,7 @@ pub const clear = struct {
 };
 
 // *******************************
-// CURSOR METHODS
+// cursor methods
 // *******************************
 
 pub const cursor = struct {
@@ -338,7 +342,7 @@ pub const cursor = struct {
         }
 
         pub fn moveTo(row: u16, col: u16) void {
-            utils.printEscapeCode("{};{}H", .{ row, col});
+            utils.printEscapeCode("{};{}H", .{ row, col });
         }
 
         pub fn moveUp(rows: u16) void {
@@ -422,18 +426,17 @@ pub const cursor = struct {
         return utils.returnEscapeCode("?25h", .{});
     }
 
-    pub const cursor_pos = struct {
+    pub const CursorPos = struct {
         rows: u16,
-        cols: u16
+        cols: u16,
     };
 
     // get cursor position
     // requires raw mode to be enabled
-    pub fn getPosition() ZTermError!cursor_pos {
-        const stdin = std.io.getStdIn().reader();
-        const stdout = std.io.getStdOut().writer();
+    pub fn getPosition() ZtermError!CursorPos {
+        const stdout_file = std.fs.File{ .handle = std.posix.STDOUT_FILENO };
 
-        stdout.writeAll(utils.returnEscapeCode("6n", .{})) catch return ZTermError.CursorPositionFailed;
+        stdout_file.writeAll(utils.returnEscapeCode("6n", .{})) catch return ZtermError.CursorPositionFailed;
 
         var pos = [2]u16{ 0, 0 };
         var buffer: [32]u8 = undefined;
@@ -441,7 +444,10 @@ pub const cursor = struct {
         var pos_i: u8 = 0;
 
         while (index < buffer.len - 1) : (index += 1) {
-            buffer[index] = stdin.readByte() catch return ZTermError.CursorPositionFailed;
+            var buf: [1]u8 = undefined;
+            const n = std.posix.read(std.posix.STDIN_FILENO, &buf) catch return ZtermError.CursorPositionFailed;
+            if (n == 0) return ZtermError.CursorPositionFailed;
+            buffer[index] = buf[0];
 
             if (std.ascii.isDigit(buffer[index])) {
                 pos[pos_i] = pos[pos_i] * 10 + (buffer[index] - '0');
@@ -455,21 +461,21 @@ pub const cursor = struct {
         }
         buffer[index] = 0;
 
-        const ret: cursor_pos = .{
+        const ret: CursorPos = .{
             .rows = pos[0],
-            .cols = pos[1]
+            .cols = pos[1],
         };
         return ret;
     }
 };
 
 // *********************
-// ALT SCREEN
+// alt screen
 // *********************
 
 pub const altScreen = struct {
     pub var enabled: bool = false;
-    
+
     pub const print = struct {
         pub fn enable() void {
             utils.printEscapeCode("?1049h", .{});
@@ -498,63 +504,58 @@ pub const altScreen = struct {
 };
 
 // *******************************
-// RAW INPUT MODE
+// raw input mode
 // *******************************
 
 pub const rawMode = struct {
-    pub const terminal_data = union {
+    pub const TerminalData = union(enum) {
         orig_termios: std.posix.termios,
-        orig_terminal: windows.DWORD
+        orig_terminal: windows.DWORD,
     };
 
-    pub fn enable() ZTermError!terminal_data {
+    pub fn enable() ZtermError!TerminalData {
         return switch (builtin.target.os.tag) {
-            .macos, .linux => terminal_data{ .orig_termios = try enableUnix() },
-            .windows => terminal_data{ .orig_terminal = try enableWindows() },
-            else => ZTermError.UnsupportedPlatform,
+            .macos, .linux => TerminalData{ .orig_termios = try enableUnix() },
+            .windows => TerminalData{ .orig_terminal = try enableWindows() },
+            else => ZtermError.UnsupportedPlatform,
         };
     }
 
-    pub fn enableUnix() ZTermError!std.posix.termios {
-        const orig_termios: std.posix.termios = std.posix.tcgetattr(std.posix.STDIN_FILENO) catch 
-            return ZTermError.TerminalSetupFailed;
+    pub fn enableUnix() ZtermError!std.posix.termios {
+        const orig_termios: std.posix.termios = std.posix.tcgetattr(std.posix.STDIN_FILENO) catch
+            return ZtermError.TerminalSetupFailed;
 
         var raw: std.posix.termios = orig_termios;
 
         // terminal flags
         raw.lflag.ECHO = false; // echo user input
         raw.lflag.ICANON = false; // read user input byte by byte
-        raw.lflag.ISIG = false; // disable SIGINT and SIGSTP signals
-        raw.lflag.IEXTEN = false; // disable CTRL-V
-        raw.iflag.IXON = false; // disable CTRL-Q and CTRL-S
+        raw.lflag.ISIG = false; // disable sigint and sigstp signals
+        raw.lflag.IEXTEN = false; // disable ctrl-v
+        raw.iflag.IXON = false; // disable ctrl-q and ctrl-s
         raw.iflag.ICRNL = false; // convert carriage returns into new lines
-        raw.iflag.BRKINT = false; // disable break condition from sending SIGINT
+        raw.iflag.BRKINT = false; // disable break condition from sending sigint
         raw.iflag.INPCK = false; // parity checking
         raw.iflag.ISTRIP = false; // strips the 8th bit of each byte
         raw.oflag.OPOST = false; // output processing
         raw.cflag.CSIZE = .CS8; // set character size to 8bits per byte
 
-        if (global_config.input_timeout_ms == 256) {
-            raw.cc[@intFromEnum(std.posix.V.MIN)] = 1; // read must read at least one byte before retuning
-            raw.cc[@intFromEnum(std.posix.V.TIME)] = 0;
-        } else {
-            raw.cc[@intFromEnum(std.posix.V.MIN)] = 0; // read can return before receving input
-            raw.cc[@intFromEnum(std.posix.V.TIME)] = global_config.input_timeout_ms/100;
-        }
+        raw.cc[6] = if (global_config.timeout_unix == 0) 1 else 0;
+        raw.cc[5] = global_config.timeout_unix;
 
-        std.posix.tcsetattr(std.posix.STDIN_FILENO, std.posix.TCSA.FLUSH, raw) catch 
-            return ZTermError.TerminalSetupFailed;
-        
+        std.posix.tcsetattr(std.posix.STDIN_FILENO, .FLUSH, raw) catch
+            return ZtermError.TerminalSetupFailed;
+
         return orig_termios;
     }
 
-    pub fn enableWindows() ZTermError!windows.DWORD {
-        const std_handle: windows.HANDLE = windows.GetStdHandle(windows.STD_INPUT_HANDLE) catch 
-            return ZTermError.WindowsAPIError;
-        
+    pub fn enableWindows() ZtermError!windows.DWORD {
+        const std_handle: windows.HANDLE = windows.GetStdHandle(windows.STD_INPUT_HANDLE) catch
+            return ZtermError.WindowsApiError;
+
         var orig_term: windows.DWORD = undefined;
         if (windows.kernel32.GetConsoleMode(std_handle, &orig_term) == 0) {
-            return ZTermError.WindowsAPIError;
+            return ZtermError.WindowsApiError;
         }
 
         var raw: windows.DWORD = orig_term;
@@ -564,38 +565,38 @@ pub const rawMode = struct {
         const ENABLE_PROCESSED_INPUT: u32 = 0x0001;
         const ENABLE_MOUSE_INPUT: u32 = 0x0010;
         const ENABLE_INSERT_MODE: u32 = 0x0020;
-        const ENABLE_QUICK_EDIT_MODE: u32 = 0x0040;	
+        const ENABLE_QUICK_EDIT_MODE: u32 = 0x0040;
         const ENABLE_VIRTUAL_TERMINAL_INPUT: u32 = 0x0200;
-        
-        raw &= ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT | 
-                ENABLE_INSERT_MODE | ENABLE_MOUSE_INPUT | ENABLE_QUICK_EDIT_MODE);
+
+        raw &= ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT |
+            ENABLE_INSERT_MODE | ENABLE_MOUSE_INPUT | ENABLE_QUICK_EDIT_MODE);
         raw |= ENABLE_VIRTUAL_TERMINAL_INPUT;
 
         if (windows.kernel32.SetConsoleMode(std_handle, raw) == 0) {
-            return ZTermError.WindowsAPIError;
+            return ZtermError.WindowsApiError;
         }
 
-        if (windows.kernel32.FlushFileBuffers(std_handle) == 0) { 
-        return ZTermError.WindowsAPIError;
-    }
-        
+        if (windows.kernel32.FlushFileBuffers(std_handle) == 0) {
+            return ZtermError.WindowsApiError;
+        }
+
         return orig_term;
     }
 
-    pub fn disable(term: terminal_data) ZTermError!void {
+    pub fn disable(term: TerminalData) ZtermError!void {
         return switch (builtin.target.os.tag) {
             .macos, .linux => {
-                std.posix.tcsetattr(std.posix.STDIN_FILENO, std.posix.TCSA.FLUSH, term.orig_termios) catch 
-                    return ZTermError.TerminalSetupFailed;
+                std.posix.tcsetattr(std.posix.STDIN_FILENO, .FLUSH, term.orig_termios) catch
+                    return ZtermError.TerminalSetupFailed;
             },
             .windows => {
-                const std_handle: windows.HANDLE = windows.GetStdHandle(windows.STD_INPUT_HANDLE) catch 
-                    return ZTermError.WindowsAPIError;
+                const std_handle: windows.HANDLE = windows.GetStdHandle(windows.STD_INPUT_HANDLE) catch
+                    return ZtermError.WindowsApiError;
                 if (windows.kernel32.SetConsoleMode(std_handle, term.orig_terminal) == 0) {
-                    return ZTermError.WindowsAPIError;
+                    return ZtermError.WindowsApiError;
                 }
             },
-            else => ZTermError.UnsupportedPlatform,
+            else => ZtermError.UnsupportedPlatform,
         };
     }
 
@@ -609,69 +610,64 @@ pub const rawMode = struct {
         utils.printEscapeCode("?1006l", .{});
     }
 
-    pub fn getNextInput() ZTermError!input {
+    pub fn getNextInput() ZtermError!Input {
         return switch (builtin.target.os.tag) {
             .macos, .linux => getNextInputUnix(),
             .windows => getNextInputWindows(),
-            else => ZTermError.UnsupportedPlatform,
+            else => ZtermError.UnsupportedPlatform,
         };
     }
 
-    fn getNextInputUnix() ZTermError!input {
+    fn getNextInputUnix() ZtermError!Input {
         var c: [32]u8 = undefined;
         c[0] = 0;
-        
+
         const bytes_read = std.posix.read(std.posix.STDIN_FILENO, &c) catch |err| switch (err) {
-            error.WouldBlock => 0, // timeout occurred
-            else => return ZTermError.InputReadFailed,
+            error.WouldBlock => 0,
+            else => return ZtermError.InputReadFailed,
         };
 
         return parseInput(c[0..bytes_read]);
     }
 
-    fn getNextInputWindows() ZTermError!input {
-        const std_handle = windows.GetStdHandle(windows.STD_INPUT_HANDLE) catch 
-            return ZTermError.WindowsAPIError;
-        
-        const timeout = if (global_config.input_timeout_ms == 256) 
-            windows.INFINITE 
-        else 
-            global_config.input_timeout_ms;
+    fn getNextInputWindows() ZtermError!Input {
+        const std_handle = windows.GetStdHandle(windows.STD_INPUT_HANDLE) catch
+            return ZtermError.WindowsApiError;
 
-        const wait_result = windows.kernel32.WaitForSingleObject(std_handle, timeout);
+        const wait_result = windows.kernel32.WaitForSingleObject(std_handle, global_config.timeout_windows);
         var c: [32]u8 = undefined;
         var bytes_read: usize = 0;
-        
+
         switch (wait_result) {
             windows.WAIT_OBJECT_0 => {
                 var bytes_read_u32: u32 = undefined;
                 if (windows.kernel32.ReadFile(std_handle, &c, c.len, &bytes_read_u32, null) == 0) {
-                    return ZTermError.InputReadFailed;
+                    return ZtermError.InputReadFailed;
                 }
                 bytes_read = bytes_read_u32;
             },
             windows.WAIT_TIMEOUT => {
                 bytes_read = 0;
             },
-            else => return ZTermError.InputReadFailed,
+            else => return ZtermError.InputReadFailed,
         }
 
         return parseInput(c[0..bytes_read]);
     }
 
-    fn parseInput(buffer: []const u8) input {
-        var ret: input = .{
+    fn parseInput(buffer: []const u8) Input {
+        var ret: Input = .{
             .value = if (buffer.len > 0) buffer[0] else 0,
-            .key = .NONE,
+            .key = .none,
             .mouse = .{
-                .button = .NONE,
+                .button = .none,
                 .column = 0,
                 .row = 0,
                 .shift = false,
                 .ctrl = false,
                 .meta = false,
-                .motion = false
-            }
+                .motion = false,
+            },
         };
 
         if (buffer.len == 0) return ret;
@@ -679,90 +675,93 @@ pub const rawMode = struct {
         if (buffer.len == 1) {
             const c = buffer[0];
             if (std.ascii.isPrint(c)) {
-                ret.key = .PRINTABLE;
+                ret.key = .printable;
                 if (std.ascii.isAlphanumeric(c)) {
-                    ret.key = .ALPHANUM;
+                    ret.key = .alphanum;
                 }
             }
 
             if (c >= 1 and c <= 26) ret.key = @enumFromInt(c);
 
             switch (c) {
-                std.ascii.control_code.cr => ret.key = .ENTER,
-                std.ascii.control_code.ht => ret.key = .TAB,
-                std.ascii.control_code.bs => ret.key = .BACKSPACE,
-                std.ascii.control_code.del => ret.key = .DELETE,
+                std.ascii.control_code.cr => ret.key = .enter,
+                std.ascii.control_code.ht => ret.key = .tab,
+                std.ascii.control_code.bs => ret.key = .backspace,
+                std.ascii.control_code.del => ret.key = .delete,
                 else => {},
             }
         } else if (buffer.len >= 3 and buffer[0] == '\x1b' and buffer[1] == '[') {
             if (buffer.len == 3) {
                 switch (buffer[2]) {
-                    'A' => ret.key = .ARROW_UP,
-                    'B' => ret.key = .ARROW_DOWN,
-                    'C' => ret.key = .ARROW_RIGHT,
-                    'D' => ret.key = .ARROW_LEFT,
-                    'H' => ret.key = .HOME,
-                    'F' => ret.key = .END,
+                    'A' => ret.key = .arrow_up,
+                    'B' => ret.key = .arrow_down,
+                    'C' => ret.key = .arrow_right,
+                    'D' => ret.key = .arrow_left,
+                    'H' => ret.key = .home,
+                    'F' => ret.key = .end,
                     else => {},
                 }
             } else if (buffer.len == 4 and buffer[3] == '~') {
                 switch (buffer[2]) {
-                    '1' => ret.key = .HOME,
-                    '3' => ret.key = .DELETE,
-                    '4' => ret.key = .END,
-                    '5' => ret.key = .PAGE_UP,
-                    '6' => ret.key = .PAGE_DOWN,
-                    '7' => ret.key = .HOME,
-                    '8' => ret.key = .END,
+                    '1' => ret.key = .home,
+                    '3' => ret.key = .delete,
+                    '4' => ret.key = .end,
+                    '5' => ret.key = .page_up,
+                    '6' => ret.key = .page_down,
+                    '7' => ret.key = .home,
+                    '8' => ret.key = .end,
                     else => {},
                 }
             } else if (buffer.len >= 6 and buffer[2] == '<') {
-                ret.key = .MOUSE;
-                
-                const mouse_data = buffer[3..buffer.len-1];
-                const last_char = buffer[buffer.len-1];
+                ret.key = .mouse;
+
+                const mouse_data = buffer[3 .. buffer.len - 1];
+                const last_char = buffer[buffer.len - 1];
 
                 var iter = std.mem.splitAny(u8, mouse_data, ";");
-                const B_str = iter.next() orelse return ret;
-                const C_str = iter.next() orelse return ret;
-                const R_str = iter.next() orelse return ret;
+                const b_str = iter.next() orelse return ret;
+                const c_str = iter.next() orelse return ret;
+                const r_str = iter.next() orelse return ret;
 
-                const B = std.fmt.parseInt(u32, B_str, 10) catch return ret;
-                const C = std.fmt.parseInt(u32, C_str, 10) catch return ret;
-                const R = std.fmt.parseInt(u32, R_str, 10) catch return ret;
+                const b = std.fmt.parseInt(u32, b_str, 10) catch return ret;
+                const c = std.fmt.parseInt(u32, c_str, 10) catch return ret;
+                const r = std.fmt.parseInt(u32, r_str, 10) catch return ret;
 
-                ret.mouse.column = C;
-                ret.mouse.row = R;
-                ret.mouse.shift = (B & 4) != 0;
-                ret.mouse.meta = (B & 8) != 0;
-                ret.mouse.ctrl = (B & 16) != 0;
+                ret.mouse.column = c;
+                ret.mouse.row = r;
+                ret.mouse.shift = (b & 4) != 0;
+                ret.mouse.meta = (b & 8) != 0;
+                ret.mouse.ctrl = (b & 16) != 0;
 
                 if (last_char == 'M') {
-                    if (B & 32 != 0) {
+                    if (b & 32 != 0) {
                         ret.mouse.motion = true;
-                        ret.mouse.button = switch (B & 3) {
-                            0 => .LEFT,
-                            1 => .MIDDLE,
-                            2 => .RIGHT,
-                            else => .NONE,
+                        ret.mouse.button = switch (b & 3) {
+                            0 => .left,
+                            1 => .middle,
+                            2 => .right,
+                            else => .none,
                         };
-                    } else if (B >= 64) {
+                    } else if (b >= 64) {
                         ret.mouse.motion = false;
-                        if (B == 64) ret.mouse.button = .SCROLL_UP
-                        else if (B == 65) ret.mouse.button = .SCROLL_DOWN
-                        else ret.mouse.button = .NONE;
+                        if (b == 64)
+                            ret.mouse.button = .scroll_up
+                        else if (b == 65)
+                            ret.mouse.button = .scroll_down
+                        else
+                            ret.mouse.button = .none;
                     } else {
                         ret.mouse.motion = false;
-                        ret.mouse.button = switch (B & 3) {
-                            0 => .LEFT,
-                            1 => .MIDDLE,
-                            2 => .RIGHT,
-                            else => .NONE,
+                        ret.mouse.button = switch (b & 3) {
+                            0 => .left,
+                            1 => .middle,
+                            2 => .right,
+                            else => .none,
                         };
                     }
                 } else if (last_char == 'm') {
                     ret.mouse.motion = false;
-                    ret.mouse.button = .RELEASE;
+                    ret.mouse.button = .release;
                 }
             }
         }
@@ -770,86 +769,86 @@ pub const rawMode = struct {
         return ret;
     }
 
-    pub const input = struct {
+    pub const Input = struct {
         value: u8,
-        key: key_type,
-        mouse: mouse_event
+        key: KeyType,
+        mouse: MouseEvent,
     };
 
-    pub const key_type = enum(u8) {
-        NONE = 0,
+    pub const KeyType = enum(u8) {
+        none = 0,
 
-        CTRL_A = 1,
-        CTRL_B = 2,
-        CTRL_C = 3,
-        CTRL_D = 4,
-        CTRL_E = 5,
-        CTRL_F = 6,
-        CTRL_G = 7,
-        CTRL_H = 8,
-        CTRL_I = 9, // is TAB
-        CTRL_J = 10,
-        CTRL_K = 11,
-        CTRL_L = 12,
-        CTRL_M = 13, // is ENTER
-        CTRL_N = 14,
-        CTRL_O = 15,
-        CTRL_P = 16,
-        CTRL_Q = 17,
-        CTRL_R = 18,
-        CTRL_S = 19,
-        CTRL_T = 20,
-        CTRL_U = 21,
-        CTRL_V = 22,
-        CTRL_W = 23,
-        CTRL_X = 24,
-        CTRL_Y = 25,
-        CTRL_Z = 26,
+        ctrl_a = 1,
+        ctrl_b = 2,
+        ctrl_c = 3,
+        ctrl_d = 4,
+        ctrl_e = 5,
+        ctrl_f = 6,
+        ctrl_g = 7,
+        ctrl_h = 8,
+        ctrl_i = 9, // is tab
+        ctrl_j = 10,
+        ctrl_k = 11,
+        ctrl_l = 12,
+        ctrl_m = 13, // is enter
+        ctrl_n = 14,
+        ctrl_o = 15,
+        ctrl_p = 16,
+        ctrl_q = 17,
+        ctrl_r = 18,
+        ctrl_s = 19,
+        ctrl_t = 20,
+        ctrl_u = 21,
+        ctrl_v = 22,
+        ctrl_w = 23,
+        ctrl_x = 24,
+        ctrl_y = 25,
+        ctrl_z = 26,
 
-        TAB,
-        ENTER,
-        BACKSPACE,
-        DELETE,
+        tab,
+        enter,
+        backspace,
+        delete,
 
-        ARROW_UP,
-        ARROW_DOWN,
-        ARROW_RIGHT,
-        ARROW_LEFT,
+        arrow_up,
+        arrow_down,
+        arrow_right,
+        arrow_left,
 
-        HOME,
-        END,
-        PAGE_UP,
-        PAGE_DOWN,
+        home,
+        end,
+        page_up,
+        page_down,
 
-        MOUSE,
+        mouse,
 
-        ALPHANUM,
-        PRINTABLE,
+        alphanum,
+        printable,
     };
 
-    pub const mouse_event = struct {
-        button: mouse_button,
+    pub const MouseEvent = struct {
+        button: MouseButton,
         column: u32,
         row: u32,
         shift: bool,
         ctrl: bool,
         meta: bool,
-        motion: bool
+        motion: bool,
     };
 
-    pub const mouse_button = enum (u8) {
-        LEFT,
-        MIDDLE,
-        RIGHT,
-        RELEASE,
-        SCROLL_UP,
-        SCROLL_DOWN,
-        NONE
+    pub const MouseButton = enum(u8) {
+        left,
+        middle,
+        right,
+        release,
+        scroll_up,
+        scroll_down,
+        none,
     };
 };
 
 // *******************************
-// UTILS
+// utils
 // *******************************
 
 pub const utils = struct {
@@ -875,56 +874,56 @@ pub const utils = struct {
         return returnEscapeCode("0m", .{});
     }
 
-    pub const terminal_size = struct {
+    pub const TerminalSize = struct {
         rows: u16,
-        cols: u16
+        cols: u16,
     };
 
     // get terminal size
     // requires raw mode to be enabled on some platforms
-    pub fn getTerminalSize() ZTermError!terminal_size {
+    pub fn getTerminalSize() ZtermError!TerminalSize {
         return switch (builtin.target.os.tag) {
             .macos, .linux => getTerminalSizeUnix(),
             .windows => getTerminalSizeWindows(),
-            else => ZTermError.UnsupportedPlatform,
+            else => ZtermError.UnsupportedPlatform,
         };
     }
 
-    fn getTerminalSizeUnix() ZTermError!terminal_size {
-        var winsizestruct: std.posix.winsize = .{ .row = 0, .col = 0, .xpixel = 0, .ypixel = 0 };
-        const err = std.posix.system.ioctl(std.io.getStdOut().handle, std.posix.T.IOCGWINSZ, @intFromPtr(&winsizestruct));
-        
+    fn getTerminalSizeUnix() ZtermError!TerminalSize {
+        var winsize_struct: std.posix.winsize = undefined;
+        const err = std.posix.system.ioctl(std.posix.STDOUT_FILENO, std.posix.T.IOCGWINSZ, @intFromPtr(&winsize_struct));
+
         if (std.posix.errno(err) != .SUCCESS) {
-            return ZTermError.TerminalSizeFailed;
+            return ZtermError.TerminalSizeFailed;
         }
-        
-        if (winsizestruct.row == 0 or winsizestruct.col == 0) {
-            return ZTermError.TerminalSizeFailed;
+
+        if (winsize_struct.row == 0 or winsize_struct.col == 0) {
+            return ZtermError.TerminalSizeFailed;
         }
-        
-        return terminal_size{
-            .rows = winsizestruct.row,
-            .cols = winsizestruct.col,
+
+        return TerminalSize{
+            .rows = winsize_struct.row,
+            .cols = winsize_struct.col,
         };
     }
 
-    fn getTerminalSizeWindows() ZTermError!terminal_size {
-        var winsizestruct: windows.CONSOLE_SCREEN_BUFFER_INFO = undefined;
-        const stdout_handle = windows.GetStdHandle(windows.STD_OUTPUT_HANDLE) catch 
-            return ZTermError.WindowsAPIError;
-        
-        if (windows.kernel32.GetConsoleScreenBufferInfo(stdout_handle, &winsizestruct) == 0) {
-            return ZTermError.TerminalSizeFailed;
+    fn getTerminalSizeWindows() ZtermError!TerminalSize {
+        var winsize_struct: windows.CONSOLE_SCREEN_BUFFER_INFO = undefined;
+        const stdout_handle = windows.GetStdHandle(windows.STD_OUTPUT_HANDLE) catch
+            return ZtermError.WindowsApiError;
+
+        if (windows.kernel32.GetConsoleScreenBufferInfo(stdout_handle, &winsize_struct) == 0) {
+            return ZtermError.TerminalSizeFailed;
         }
-        
-        const cols = @as(u16, @intCast(winsizestruct.srWindow.Right - winsizestruct.srWindow.Left + 1));
-        const rows = @as(u16, @intCast(winsizestruct.srWindow.Bottom - winsizestruct.srWindow.Top + 1));
-        
+
+        const cols = @as(u16, @intCast(winsize_struct.srWindow.Right - winsize_struct.srWindow.Left + 1));
+        const rows = @as(u16, @intCast(winsize_struct.srWindow.Bottom - winsize_struct.srWindow.Top + 1));
+
         if (cols == 0 or rows == 0) {
-            return ZTermError.TerminalSizeFailed;
+            return ZtermError.TerminalSizeFailed;
         }
-        
-        return terminal_size{
+
+        return TerminalSize{
             .rows = rows,
             .cols = cols,
         };

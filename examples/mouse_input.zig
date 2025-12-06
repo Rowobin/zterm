@@ -6,32 +6,16 @@ const zterm = @import("zterm");
 // This example shows a simple way to process mouse input
 //
 
-const option = struct {
-    text: [] const u8,
-    line: u8,
-    selected: bool
-};
+const option = struct { text: []const u8, line: u8, selected: bool };
 
-var options= [_]option{
-    .{
-        .text = "Welcome to Zterm!",
-        .line = 2,
-        .selected = false
-    },
-    .{
-        .text = "made by rowobin",
-        .line = 4,
-        .selected = false
-    },
-    .{
-        .text = "-q to exit-",
-        .line = 6,
-        .selected = false
-    },
+var options = [_]option{
+    .{ .text = "Welcome to Zterm!", .line = 2, .selected = false },
+    .{ .text = "made by rowobin", .line = 4, .selected = false },
+    .{ .text = "-q to exit-", .line = 6, .selected = false },
 };
 
 const strings = [_][]const u8{ "Welcome to Zterm :)", "made by rowobin", "exit" };
-const lines = [_][] const u8{2, 4, 6};
+const lines = [_][]const u8{ 2, 4, 6 };
 
 pub fn main() !void {
     zterm.cursor.print.hide();
@@ -58,13 +42,13 @@ pub fn handleInput() i8 {
     if (input.value == 0) return 0;
     if (input.value == 'q') return -1;
 
-    if(input.key == .MOUSE){
-        for(options, 0..) |_, i| {
+    if (input.key == .mouse) {
+        for (options, 0..) |_, i| {
             options[i].selected = (options[i].line == input.mouse.row);
         }
 
-        if(input.mouse.button == .LEFT){
-            if(options[2].selected){
+        if (input.mouse.button == .left) {
+            if (options[2].selected) {
                 return -1;
             }
         }
@@ -74,16 +58,16 @@ pub fn handleInput() i8 {
 }
 
 pub fn draw() void {
-    for(options) |opt| {
-        if(!opt.selected) {
+    for (options) |opt| {
+        if (!opt.selected) {
             zterm.color.print.bg(.white);
             zterm.color.print.fg(.black);
         } else {
             zterm.color.print.bg(.red);
             zterm.color.print.fg(.white);
         }
-        
+
         zterm.cursor.print.moveTo(opt.line, 2);
         std.debug.print(" {s} ", .{opt.text});
-    } 
+    }
 }

@@ -9,7 +9,7 @@ const zterm = @import("zterm");
 pub fn main() !void {
 
     // Using Colors
-    
+
     zterm.color.print.fg(.red);
     std.debug.print("Hello, world! (red text)\n", .{});
     zterm.utils.print.resetAll();
@@ -18,24 +18,15 @@ pub fn main() !void {
     std.debug.print("Hello, world! (blue background)\n\n", .{});
     zterm.utils.print.resetAll();
 
-    std.debug.print("{s}Hello, world! (red text){s}\n", .{
-        zterm.color.fg(.red),
-        zterm.utils.resetAll()
-    });
+    std.debug.print("{s}Hello, world! (red text){s}\n", .{ zterm.color.fg(.red), zterm.utils.resetAll() });
 
-    std.debug.print("{s}Hello, world! (blue background){s}\n\n", .{
-        zterm.color.bg(.blue),
-        zterm.utils.resetAll()
-    });
+    std.debug.print("{s}Hello, world! (blue background){s}\n\n", .{ zterm.color.bg(.blue), zterm.utils.resetAll() });
 
-    zterm.color.print.fgRGB(69, 123, 157);
+    zterm.color.print.fgRgb(69, 123, 157);
     std.debug.print("Hello, world! (RGB(169, 123, 157) text)\n", .{});
     zterm.utils.print.resetAll();
 
-    std.debug.print("{s}Hello, world! (RGB(230, 57, 70) background){s}\n\n", .{
-        zterm.color.bgRGB(230, 57, 70),
-        zterm.utils.resetAll()
-    });
+    std.debug.print("{s}Hello, world! (RGB(230, 57, 70) background){s}\n\n", .{ zterm.color.bgRgb(230, 57, 70), zterm.utils.resetAll() });
 
     // Using Styles
 
@@ -55,23 +46,11 @@ pub fn main() !void {
     std.debug.print("Hello, world! (hidden)\n", .{});
     zterm.utils.print.resetAll();
 
-    std.debug.print("{s}Hello, world! (italic){s}\n", .{
-        zterm.style.italic.set(),
-        zterm.style.italic.reset()
-    });
+    std.debug.print("{s}Hello, world! (italic){s}\n", .{ zterm.style.italic.set(), zterm.style.italic.reset() });
 
-    std.debug.print("{s}Hello, world! (reverse){s}\n", .{
-        zterm.style.reverse.set(),
-        zterm.utils.resetAll()
-    });
+    std.debug.print("{s}Hello, world! (reverse){s}\n", .{ zterm.style.reverse.set(), zterm.utils.resetAll() });
 
-    std.debug.print("{s}Hello, world! (strikethrough){s}\n", .{
-        zterm.style.strikethrough.set(),
-        zterm.utils.resetAll()
-    });
+    std.debug.print("{s}Hello, world! (strikethrough){s}\n", .{ zterm.style.strikethrough.set(), zterm.utils.resetAll() });
 
-    std.debug.print("{s}Hello, world! (underline){s}\n", .{
-        zterm.style.underline.set(),
-        zterm.utils.resetAll()
-    });
+    std.debug.print("{s}Hello, world! (underline){s}\n", .{ zterm.style.underline.set(), zterm.utils.resetAll() });
 }

@@ -5,10 +5,10 @@ const zterm = @import("zterm");
 
 //
 // [RAW_MODE]
-// This example shows how to enable raw input mode and how to process user input byte by byte 
+// This example shows how to enable raw input mode and how to process user input byte by byte
 //
 
-pub fn main() !void{
+pub fn main() !void {
     // enable raw mode
     // the terminal will now process user input byte by byte
     const orig_termios = try zterm.rawMode.enable();
@@ -20,37 +20,28 @@ pub fn main() !void{
 
     while (true) {
         const input = zterm.rawMode.getNextInput() catch unreachable;
-        
-        if(input.value == 0) continue;
-        
+
+        if (input.value == 0) continue;
+
         switch (input.key) {
-            .ALPHANUM,
-            .PRINTABLE => {
+            .alphanum, .printable => {
                 std.debug.print("{c} ", .{input.value});
             },
-            .MOUSE => {
-                std.debug.print("MOUSE INPUT!\n\r  BUTTON: {s}\n\r  POS:{d},{d}\n\r  CTRL: {any}\n\r  SHIFT: {any}\n\r  META: {any}\n\r  MOTION: {any}\n\r", .{
-                    @tagName(input.mouse.button),
-                    input.mouse.column,
-                    input.mouse.row,
-                    input.mouse.ctrl,
-                    input.mouse.shift,
-                    input.mouse.meta,
-                    input.mouse.motion
-                });
+            .mouse => {
+                std.debug.print("MOUSE INPUT!\n\r  BUTTON: {s}\n\r  POS:{d},{d}\n\r  CTRL: {any}\n\r  SHIFT: {any}\n\r  META: {any}\n\r  MOTION: {any}\n\r", .{ @tagName(input.mouse.button), input.mouse.column, input.mouse.row, input.mouse.ctrl, input.mouse.shift, input.mouse.meta, input.mouse.motion });
                 continue;
             },
-            .NONE => {
+            .none => {
                 std.debug.print("NONE enum (raw value: {d}) ", .{input.value});
             },
             else => {
                 std.debug.print("{s} ", .{@tagName(input.key)});
-            }
+            },
         }
 
         const cursor_pos = zterm.cursor.getPosition() catch unreachable;
         std.debug.print("Cursor is at line {d}\r\n", .{cursor_pos.rows});
 
-        if (input.value == 'q' or input.key == .CTRL_C) break; // Press 'q' to quit
+        if (input.value == 'q' or input.key == .ctrl_c) break; // Press 'q' to quit
     }
 }

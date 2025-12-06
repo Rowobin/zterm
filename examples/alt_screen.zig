@@ -25,11 +25,11 @@ pub fn main() !void {
 
         if (input.value == 0) continue;
 
-        if (input.key == .ENTER) {
+        if (input.key == .enter) {
             break;
         }
 
-        if (input.value == 'q' or input.key == .CTRL_C) {
+        if (input.value == 'q' or input.key == .ctrl_c) {
             break;
         }
     }
