@@ -433,39 +433,37 @@ pub const cursor = struct {
 
     // get cursor position
     // requires raw mode to be enabled
-    pub fn getPosition() ZtermError!CursorPos {
-        const stdout_file = std.fs.File{ .handle = std.posix.STDOUT_FILENO };
 
-        stdout_file.writeAll(utils.returnEscapeCode("6n", .{})) catch return ZtermError.CursorPositionFailed;
+    pub fn getPosition() ZtermError!CursorPos {
+        const stdin = std.io.getStdIn();
+        const stdout = std.io.getStdOut();
+        stdout.writeAll(utils.returnEscapeCode("6n", .{})) catch return ZtermError.CursorPositionFailed;
 
         var pos = [2]u16{ 0, 0 };
-        var buffer: [32]u8 = undefined;
-        var index: usize = 0;
         var pos_i: u8 = 0;
+        var char_buf: [1]u8 = undefined;
 
-        while (index < buffer.len - 1) : (index += 1) {
-            var buf: [1]u8 = undefined;
-            const n = std.posix.read(std.posix.STDIN_FILENO, &buf) catch return ZtermError.CursorPositionFailed;
-            if (n == 0) return ZtermError.CursorPositionFailed;
-            buffer[index] = buf[0];
+        var safety_counter: usize = 0;
+        while (safety_counter < 32) : (safety_counter += 1) {
+            const bytes_read = stdin.read(&char_buf) catch return ZtermError.CursorPositionFailed;
 
-            if (std.ascii.isDigit(buffer[index])) {
-                pos[pos_i] = pos[pos_i] * 10 + (buffer[index] - '0');
+            if (bytes_read == 0) return ZtermError.CursorPositionFailed;
+
+            const char = char_buf[0];
+
+            if (char == 'R') break;
+
+            if (char == ';') {
+                pos_i = 1;
+            } else if (std.ascii.isDigit(char)) {
+                pos[pos_i] = pos[pos_i] * 10 + (char - '0');
             }
-
-            if (buffer[index] == 'R') {
-                index += 1;
-                break;
-            }
-            if (buffer[index] == ';') pos_i += 1;
         }
-        buffer[index] = 0;
 
-        const ret: CursorPos = .{
+        return CursorPos{
             .rows = pos[0],
-            .cols = pos[1],
+            .cols = pos[1]
         };
-        return ret;
     }
 };
 
