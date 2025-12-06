@@ -3,7 +3,7 @@ A single-file low-level terminal manipulation library written in Zig. Built as a
 
 If you find any bugs or other issues, please let me know. If you think there's features that I should add, suggestions and PRs are always appreciated!
 
-> Tested with zig 0.14.1 (plans to update to 0.15.2 soon)
+> Tested with zig 0.14.1
 
 > Tested on MacOS, Linux and Windows
 
