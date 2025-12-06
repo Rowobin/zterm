@@ -538,8 +538,8 @@ pub const rawMode = struct {
         raw.oflag.OPOST = false; // output processing
         raw.cflag.CSIZE = .CS8; // set character size to 8bits per byte
 
-        raw.cc[6] = if (global_config.timeout_unix == 0) 1 else 0;
-        raw.cc[5] = global_config.timeout_unix;
+        raw.cc[@intFromEnum(std.posix.V.MIN)] = if(global_config.timeout_unix == 0) 1 else 0;
+        raw.cc[@intFromEnum(std.posix.V.TIME)] = global_config.timeout_unix;
 
         std.posix.tcsetattr(std.posix.STDIN_FILENO, .FLUSH, raw) catch
             return ZtermError.TerminalSetupFailed;
